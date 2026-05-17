@@ -1,6 +1,6 @@
-# CTRL — Gaming & QOL Dashboard
+# CTRL — QOL dashboard
 
-Dein persönliches Windows-Dashboard. Startet automatisch mit Windows.
+Bestes QOL dashboard
 
 ---
 
