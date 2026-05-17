@@ -3,7 +3,7 @@ const SUPABASE_URL = 'https://asjrsshmuqepkultayry.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_DaL6vOcejc_byWWxRYDaww_p2W6c3eb';
 
 // ADMIN EMAILS — nur diese dürfen das Panel nutzen
-const ADMIN_EMAILS = ['Joelknippel12@gmx.de'
+const ADMIN_EMAILS = [
   // DEINE EMAIL HIER EINTRAGEN
 ];
 

@@ -1,0 +1,5 @@
+node_modules/
+dist/
+tools/nircmd.zip
+*.log
+.DS_Store
