@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTRL</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Weather Effects -->
+<canvas id="weather-canvas"></canvas>
+<div id="night-overlay"></div>
+<div id="thunder-flash"></div>
+
+<!-- TITLEBAR -->
+<div class="titlebar">
+  <div class="tl"><div class="logo-dot"></div><span class="app-title">CTRL</span></div>
+  <span class="clk" id="clk">--:--:--</span>
+  <button onclick="doLogout()" style="background:transparent;border:1px solid rgba(0,200,255,0.15);border-radius:4px;padding:3px 10px;font-family:Rajdhani,sans-serif;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,200,255,0.4);cursor:pointer;-webkit-app-region:no-drag;" title="Abmelden">LOGOUT</button>
+  <div class="win-btns">
+    <button class="win-btn win-btn-min" onclick="window.ctrl.minimize()" title="Minimieren">
+      <svg width="12" height="2" viewBox="0 0 12 2" style="display:block"><rect width="12" height="1.5" y="0.25" fill="currentColor" rx="0.5"/></svg>
+    </button>
+    <button class="win-btn win-btn-close" onclick="window.ctrl.close()" title="Schließen">
+      <svg width="12" height="12" viewBox="0 0 12 12" style="display:block"><line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="sw('dash',this)">  <i class="ti ti-layout-dashboard"></i>Dashboard</button>
+  <button class="tab-btn tab-btn-disabled" disabled title="Wird gerade überarbeitet..."> <i class="ti ti-volume"></i>Audio <span class="tab-wip">⚙</span></button>
+  <button class="tab-btn"        onclick="sw('disk',this)">  <i class="ti ti-device-hard-disk"></i>Festplatten</button>
+  <button class="tab-btn"        onclick="sw('net',this)">   <i class="ti ti-wifi"></i>Netzwerk</button>
+  <button class="tab-btn"        onclick="sw('timer',this)"> <i class="ti ti-clock-off"></i>Shutdown</button>
+  <button class="tab-btn"        onclick="sw('games',this)"> <i class="ti ti-device-gamepad-2"></i>Spiele</button>
+  <button class="tab-btn"        onclick="sw('session',this)"><i class="ti ti-chart-bar"></i>Session</button>
+  <button class="tab-btn"        onclick="sw('misc',this)"><i class="ti ti-palette"></i>MISC</button>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div class="tc active" id="tab-dash">
+  <div class="dash-grid">
+
+    <div class="panel">
+      <div class="pulse-ring"><div class="pcenter"></div></div>
+      <div class="plabel">System</div>
+      <div class="bar-row"><div class="bar-lbl"><span>CPU</span><span id="cv">--%</span></div><div class="btrack"><div class="bfill" id="cb" style="width:0%"></div></div></div>
+      <div class="bar-row"><div class="bar-lbl"><span>RAM</span><span id="rv">--%</span></div><div class="btrack"><div class="bfill" id="rb" style="width:0%"></div></div></div>
+      <div class="bar-row"><div class="bar-lbl"><span>GPU</span><span id="gv">--%</span></div><div class="btrack"><div class="bfill" id="gb" style="width:0%"></div></div></div>
+      <div id="driver-alert-dash"></div>
+
+      <!-- Defender Toggle -->
+      <div style="margin-top:12px;">
+        <div class="plabel">Windows Defender</div>
+        <div class="defender-row" id="defender-row">
+          <div class="defender-status" id="defender-status">
+            <div class="sdot" id="defender-dot" style="background:rgba(255,255,255,0.13)"></div>
+            <span id="defender-label" style="font-size:10px;color:rgba(200,220,255,0.55);letter-spacing:0.5px;">Wird geprüft...</span>
+          </div>
+          <label class="toggle" title="Defender an/aus" style="margin-left:auto;">
+            <input type="checkbox" id="defender-toggle">
+            <div class="ttrack" style="border-color:rgba(0,200,255,0.2);"></div>
+            <div class="tthumb" style="background:rgba(0,200,255,0.3);"></div>
+          </label>
+        </div>
+        <div style="font-size:8px;color:rgba(0,200,255,0.25);letter-spacing:0.5px;margin-top:4px;">Deaktiviert sich beim nächsten Boot automatisch wieder</div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="plabel">Uptime</div>
+        <div class="mono" style="font-size:20px;color:#e0f4ff;" id="uv">00:00:00</div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="plabel">Netzwerk</div>
+        <div style="display:flex;gap:6px;">
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.02);border:1px solid rgba(0,200,255,0.07);border-radius:6px;padding:8px;">
+            <div class="mono" style="font-size:17px;color:#00d4ff;" id="d-dl">0.00</div>
+            <div style="font-size:8px;color:rgba(0,200,255,0.35);letter-spacing:1px;margin-top:2px;">↓ MB/s</div>
+          </div>
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.02);border:1px solid rgba(0,200,255,0.07);border-radius:6px;padding:8px;">
+            <div class="mono" style="font-size:17px;color:#4db8ff;" id="d-ul">0.00</div>
+            <div style="font-size:8px;color:rgba(0,200,255,0.35);letter-spacing:1px;margin-top:2px;">↑ MB/s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Temp Alert placeholder -->
+      <div id="temp-alert-dash"></div>
+
+      <!-- RAM + Cleanup -->
+      <div style="margin-top:10px;">
+        <div class="plabel">System Tools</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="sys-tool-btn" onclick="doFreeRam()">
+            <i class="ti ti-refresh"></i>
+            <span>RAM freigeben</span>
+            <span class="sys-tool-val" id="ram-free-val"></span>
+          </button>
+          <button class="sys-tool-btn" onclick="doCleanup()">
+            <i class="ti ti-trash"></i>
+            <span>Temp + Papierkorb</span>
+            <span class="sys-tool-val" id="cleanup-val"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="display:flex;flex-direction:column;gap:10px;">
+      <div class="plabel">Schnellstart</div>
+      <div class="hex-grid" id="quick-grid">
+        <!-- dynamisch befüllt durch renderQuickLaunch() -->
+      </div>
+      <div>
+        <div class="plabel" style="margin-top:4px;">Status</div>
+        <div class="srow"><div class="sdot sok"></div><span class="sname">Autostart</span><span class="sval">AKTIV</span></div>
+        <div class="srow"><div class="sdot" id="d-mute-dot" style="background:rgba(255,255,255,0.13)"></div><span class="sname">System Mute</span><span class="sval" id="d-mute-val">AUS</span></div>
+        <div class="srow"><div class="sdot" id="d-timer-dot" style="background:rgba(255,255,255,0.13)"></div><span class="sname">Shutdown Timer</span><span class="sval" id="d-timer-val">INAKTIV</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Spotify + Weather row below -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;padding:0 14px 14px;">
+
+    <!-- Spotify Player -->
+    <div class="panel" id="spotify-panel">
+      <div class="plabel">Spotify</div>
+      <div id="spotify-track-info" style="margin-bottom:10px;min-height:32px;">
+        <div style="font-size:11px;color:rgba(200,230,255,0.5);letter-spacing:0.5px;" id="spotify-song">—</div>
+        <div style="font-size:9px;color:rgba(0,200,255,0.35);letter-spacing:0.5px;margin-top:2px;" id="spotify-artist"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button class="ctrl-media-btn" onclick="spotifyCtrl('prev')" title="Zurück"><i class="ti ti-player-skip-back"></i></button>
+        <button class="ctrl-media-btn ctrl-media-play" onclick="spotifyCtrl('play')" title="Play/Pause" id="spotify-play-btn"><i class="ti ti-player-play"></i></button>
+        <button class="ctrl-media-btn" onclick="spotifyCtrl('next')" title="Weiter"><i class="ti ti-player-skip-forward"></i></button>
+      </div>
+    </div>
+
+    <!-- Wetter -->
+    <div class="panel" id="weather-panel">
+      <div class="plabel">Wetter</div>
+      <div id="weather-content" style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:9px;color:rgba(0,200,255,0.35);letter-spacing:0.5px;">Wird geladen...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mullvad VPN Widget -->
+  <div style="padding:0 14px 14px;">
+    <div class="panel" id="mullvad-panel">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="mullvad-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;transition:all 0.3s;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="plabel" style="margin-bottom:0;">Mullvad VPN</span>
+            <span id="mullvad-status-badge" style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.25);">WIRD GEPRÜFT...</span>
+          </div>
+          <div id="mullvad-location" style="font-size:9px;color:rgba(0,200,255,0.35);letter-spacing:0.5px;margin-top:2px;"></div>
+        </div>
+        <button id="mullvad-btn" onclick="mullvadToggle()" style="display:none;border:none;border-radius:7px;padding:8px 18px;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;"></button>
+        <div id="mullvad-not-installed" style="display:none;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:0.5px;">Mullvad nicht installiert</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AUDIO MIXER ═══ -->
+<div class="tc" id="tab-mixer">
+
+  <div class="automute-banner" id="amb">
+    <i class="ti ti-volume-off am-ico"></i>
+    <div class="am-info">
+      <div class="am-title">System Sound — Auto-Mute beim Start</div>
+      <div class="am-desc" id="amd">Inaktiv — System Sound wird beim Start nicht stummgeschaltet</div>
+    </div>
+    <div class="am-badge" id="amg">DEAKTIVIERT</div>
+    <label class="toggle">
+      <input type="checkbox" id="amt" onchange="toggleAM(this)">
+      <div class="ttrack"></div><div class="tthumb"></div>
+    </label>
+  </div>
+
+  <div class="master-row">
+    <i class="ti ti-volume" style="font-size:24px;color:#00d4ff;"></i>
+    <div style="flex:0 0 auto;">
+      <div style="font-size:13px;font-weight:700;letter-spacing:2px;color:#e0f4ff;text-transform:uppercase;">Master</div>
+      <div style="font-size:9px;color:rgba(0,200,255,0.35);letter-spacing:1px;">Systemlautstärke</div>
+    </div>
+    <input type="range" min="0" max="100" value="100" class="vol-slider"
+      style="background:linear-gradient(90deg,#00d4ff 100%,rgba(255,255,255,0.07) 100%)"
+      oninput="updMaster(this)">
+    <div class="mono" style="font-size:20px;color:#00d4ff;min-width:44px;text-align:right;" id="master-val">100%</div>
+  </div>
+
+  <div class="apps-grid" id="apps-grid"></div>
+  </div>
+</div>
+
+<!-- ═══ FESTPLATTEN ═══ -->
+<div class="tc" id="tab-disk">
+  <div class="disk-grid" id="disk-grid">
+    <div style="color:rgba(0,200,255,0.4);font-size:11px;letter-spacing:1px;padding:20px;">Laufwerke werden geladen...</div>
+  </div>
+</div>
+
+<!-- ═══ NETZWERK ═══ -->
+<div class="tc" id="tab-net">
+  <div class="net-top">
+    <div class="net-speed-card">
+      <i class="ti ti-arrow-down" style="font-size:24px;color:#00d4ff;margin-bottom:6px;display:block;"></i>
+      <div class="net-val mono" id="nl-dl" style="color:#00d4ff">0.00</div>
+      <div class="net-unit">MB/S</div>
+      <div class="net-lbl">Download</div>
+    </div>
+    <div class="net-speed-card">
+      <i class="ti ti-arrow-up" style="font-size:24px;color:#4db8ff;margin-bottom:6px;display:block;"></i>
+      <div class="net-val mono" id="nl-ul" style="color:#4db8ff">0.00</div>
+      <div class="net-unit">MB/S</div>
+      <div class="net-lbl">Upload</div>
+    </div>
+  </div>
+  <div class="plabel" style="margin-bottom:8px;">Ping — Game Server</div>
+  <div class="ping-grid">
+    <div class="ping-card"><div class="ping-dot pg"></div><span class="ping-game">CS2</span>      <span class="ping-ms mono pg-c" id="ping-cs2">--ms</span></div>
+    <div class="ping-card"><div class="ping-dot pg"></div><span class="ping-game">Valorant</span> <span class="ping-ms mono pg-c" id="ping-val">--ms</span></div>
+    <div class="ping-card"><div class="ping-dot pg"></div><span class="ping-game">LoL</span>       <span class="ping-ms mono pg-c" id="ping-lol">--ms</span></div>
+    <div class="ping-card"><div class="ping-dot py"></div><span class="ping-game">Warzone</span>  <span class="ping-ms mono py-c" id="ping-wz">--ms</span></div>
+    <div class="ping-card"><div class="ping-dot pg"></div><span class="ping-game">Discord</span>  <span class="ping-ms mono pg-c" id="ping-dc">--ms</span></div>
+    <div class="ping-card"><div class="ping-dot pg"></div><span class="ping-game">Steam</span>    <span class="ping-ms mono pg-c" id="ping-st">--ms</span></div>
+  </div>
+</div>
+
+<!-- ═══ SHUTDOWN TIMER ═══ -->
+<div class="tc" id="tab-timer">
+  <div class="timer-center">
+    <div class="timer-display mono" id="td">00:00:00</div>
+    <div class="timer-status-txt" id="ts">Kein Timer aktiv — Zeit auswählen und starten</div>
+    <div class="timer-presets">
+      <button class="preset-btn" onclick="setPreset(15,this)">15 Min</button>
+      <button class="preset-btn" onclick="setPreset(30,this)">30 Min</button>
+      <button class="preset-btn" onclick="setPreset(60,this)">1 Std</button>
+      <button class="preset-btn" onclick="setPreset(120,this)">2 Std</button>
+      <button class="preset-btn" onclick="setPreset(240,this)">4 Std</button>
+    </div>
+    <div class="timer-custom">
+      <input type="number" class="timer-input" id="custom-min" placeholder="90" min="1" max="999">
+      <span class="timer-input-lbl">Minuten</span>
+    </div>
+    <div class="timer-btns">
+      <button class="tbtn tbtn-start" onclick="startTimer()"><i class="ti ti-clock-off"></i> TIMER STARTEN</button>
+      <button class="tbtn tbtn-stop"  onclick="stopTimer()"> <i class="ti ti-x"></i> ABBRECHEN</button>
+    </div>
+    <div class="panel" style="width:100%;max-width:460px;text-align:center;">
+      <div class="plabel">Info</div>
+      <div style="font-size:11px;color:rgba(200,220,255,0.4);line-height:1.8;letter-spacing:0.5px;">
+        Nach Ablauf fährt Windows automatisch herunter (shutdown /s /f).<br>
+        Alle Programme werden geschlossen. Timer jederzeit abbrechbar.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SESSION ═══ -->
+<div class="tc" id="tab-session">
+  <div class="uptime-record">
+    <i class="ti ti-trophy" style="font-size:28px;color:rgba(255,200,0,0.6);"></i>
+    <div style="flex:1;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,220,100,0.7);">Uptime Rekord</div>
+      <div class="mono" style="font-size:20px;color:rgba(255,220,100,0.9);margin-top:3px;" id="rec-val">--:--:--</div>
+      <div style="font-size:9px;color:rgba(255,200,0,0.35);letter-spacing:0.5px;margin-top:2px;" id="rec-date">Noch kein Rekord</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:9px;color:rgba(255,200,0,0.35);letter-spacing:1.5px;text-transform:uppercase;">Aktuelle Session</div>
+      <div class="mono" style="font-size:20px;color:rgba(255,220,100,0.8);margin-top:3px;" id="sess-up">00:00:00</div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <i class="ti ti-clock"          style="font-size:22px;color:#00d4ff;margin-bottom:7px;display:block;"></i>
+      <div class="mono" style="font-size:20px;color:#00d4ff;"  id="sc-uptime">0h 0m</div>
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,200,255,0.35);margin-top:5px;">Session Laufzeit</div>
+    </div>
+    <div class="stat-card">
+      <i class="ti ti-cpu"            style="font-size:22px;color:#4db8ff;margin-bottom:7px;display:block;"></i>
+      <div class="mono" style="font-size:20px;color:#4db8ff;" id="sc-cpu">--%</div>
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,200,255,0.35);margin-top:5px;">CPU Ø Session</div>
+    </div>
+    <div class="stat-card">
+      <i class="ti ti-device-desktop" style="font-size:22px;color:#7289da;margin-bottom:7px;display:block;"></i>
+      <div class="mono" style="font-size:20px;color:#7289da;" id="sc-ram">--%</div>
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,200,255,0.35);margin-top:5px;">RAM Ø Session</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ SPIELE ═══ -->
+<div class="tc" id="tab-games">
+  <div class="plabel">Spiele Schnellstart</div>
+  <div class="games-grid" id="games-grid">
+    <!-- dynamisch befüllt -->
+  </div>
+  <button class="add-game-btn" onclick="addGame()" style="width:100%;margin-top:4px;">
+    <i class="ti ti-plus" style="font-size:22px;"></i>
+    <span>Spiel hinzufügen</span>
+    <span style="font-size:8px;opacity:0.6;letter-spacing:0.5px;">Exe-Datei auswählen</span>
+  </button>
+</div>
+
+
+<!-- ═══ MISC ═══ -->
+<div class="tc" id="tab-misc">
+
+  <!-- Groq API Key -->
+  <div class="panel" style="margin-bottom:12px;">
+    <div class="plabel">KI Assistent — Groq API Key <span style="color:rgba(0,255,150,0.5);font-size:8px;margin-left:6px;">KOSTENLOS</span></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+      <input type="password" id="groq-key-input" placeholder="gsk_..." 
+        style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:6px;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#e0f4ff;outline:none;"
+        oninput="saveGroqKey(this.value)">
+      <button class="tbtn tbtn-start" onclick="testGroqKey()" style="padding:7px 14px;font-size:10px;white-space:nowrap;">
+        <i class="ti ti-check"></i> Testen
+      </button>
+    </div>
+    <div style="font-size:9px;color:rgba(0,200,255,0.3);letter-spacing:0.5px;">
+      Kostenlos unter <span style="color:rgba(0,200,255,0.6);">console.groq.com</span> → API Keys → Create key
+    </div>
+  </div>
+
+  <!-- Wetter-Effekte -->
+  <div class="panel" style="margin-bottom:12px;">
+    <div class="plabel">Wetter-Effekte</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:rgba(200,230,255,0.75);">Dynamic Weather World</div>
+        <div style="font-size:9px;color:rgba(0,200,255,0.35);letter-spacing:0.5px;margin-top:2px;">UI reagiert auf das aktuelle Wetter</div>
+      </div>
+      <label class="toggle" title="Wetter-Effekte an/aus">
+        <input type="checkbox" id="weather-fx-toggle" checked onchange="toggleWeatherFx(this.checked)">
+        <div class="ttrack" style="border-color:rgba(0,200,255,0.2);"></div>
+        <div class="tthumb" style="background:rgba(0,200,255,0.3);"></div>
+      </label>
+    </div>
+    <div id="weather-fx-status" style="font-size:9px;color:rgba(0,200,255,0.4);letter-spacing:1px;">
+      Kein Effekt aktiv
+    </div>
+  </div>
+
+  <!-- Grid Einstellungen -->
+  <div class="panel" style="margin-bottom:12px;">
+    <div class="plabel">Hintergrund-Grid</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:10px;color:rgba(200,220,255,0.6);letter-spacing:0.5px;">Grid anzeigen</span>
+      <label class="toggle">
+        <input type="checkbox" id="grid-toggle" checked onchange="toggleGrid(this.checked)">
+        <div class="ttrack" style="border-color:rgba(0,200,255,0.2);"></div>
+        <div class="tthumb" style="background:rgba(0,200,255,0.3);"></div>
+      </label>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+      <span style="font-size:10px;color:rgba(200,220,255,0.6);letter-spacing:0.5px;flex:1;">Grid-Farbe</span>
+      <input type="color" id="grid-color" value="#00c8ff"
+        oninput="setGridColor(this.value)"
+        style="width:44px;height:28px;background:transparent;border:1px solid rgba(0,200,255,0.2);border-radius:6px;cursor:pointer;padding:2px;">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:10px;color:rgba(200,220,255,0.6);letter-spacing:0.5px;width:80px;">Deckkraft</span>
+      <input type="range" min="1" max="15" value="4" class="vol-slider" id="grid-opacity"
+        style="flex:1;background:linear-gradient(90deg,var(--accent) 27%,rgba(255,255,255,0.07) 27%)"
+        oninput="setGridOpacity(this)">
+      <span class="mono" style="font-size:11px;color:var(--accent);min-width:30px;" id="grid-opacity-val">4%</span>
+    </div>
+  </div>
+
+  <!-- Akzentfarbe -->
+  <div class="panel" style="margin-bottom:12px;">
+    <div class="plabel">Akzentfarbe</div>
+    <div class="color-presets" id="color-presets">
+      <button class="color-preset active" data-color="#00d4ff" data-glow="#0066ff" style="background:#00d4ff;" onclick="setAccent('#00d4ff','#0066ff',this)" title="Cyan"></button>
+      <button class="color-preset" data-color="#a855f7" data-glow="#7c3aed" style="background:#a855f7;" onclick="setAccent('#a855f7','#7c3aed',this)" title="Lila"></button>
+      <button class="color-preset" data-color="#22c55e" data-glow="#15803d" style="background:#22c55e;" onclick="setAccent('#22c55e','#15803d',this)" title="Grün"></button>
+      <button class="color-preset" data-color="#f97316" data-glow="#c2410c" style="background:#f97316;" onclick="setAccent('#f97316','#c2410c',this)" title="Orange"></button>
+      <button class="color-preset" data-color="#ef4444" data-glow="#b91c1c" style="background:#ef4444;" onclick="setAccent('#ef4444','#b91c1c',this)" title="Rot"></button>
+      <button class="color-preset" data-color="#eab308" data-glow="#a16207" style="background:#eab308;" onclick="setAccent('#eab308','#a16207',this)" title="Gold"></button>
+      <button class="color-preset" data-color="#ec4899" data-glow="#be185d" style="background:#ec4899;" onclick="setAccent('#ec4899','#be185d',this)" title="Pink"></button>
+    </div>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(200,220,255,0.4);">Eigene Farbe</span>
+      <input type="color" id="custom-color" value="#00d4ff" oninput="setAccentCustom(this.value)"
+        style="background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:6px;width:44px;height:28px;cursor:pointer;padding:2px;">
+    </div>
+  </div>
+
+  <!-- Hintergrund -->
+  <div class="panel">
+    <div class="plabel">Hintergrund</div>
+    <div class="bg-presets" id="bg-presets">
+      <button class="bg-preset active" data-bg="none" onclick="setBackground('none',this)">
+        <div class="bg-preview" style="background:#0a0c10;"></div>
+        <span>Standard</span>
+      </button>
+      <button class="bg-preset" data-bg="gradient1" onclick="setBackground('gradient1',this)">
+        <div class="bg-preview" style="background:linear-gradient(135deg,#0a0c10,#0d1b2a,#0a0c10);"></div>
+        <span>Deep Ocean</span>
+      </button>
+      <button class="bg-preset" data-bg="gradient2" onclick="setBackground('gradient2',this)">
+        <div class="bg-preview" style="background:linear-gradient(135deg,#0a0c10,#1a0a2e,#0a0c10);"></div>
+        <span>Midnight</span>
+      </button>
+      <button class="bg-preset" data-bg="gradient3" onclick="setBackground('gradient3',this)">
+        <div class="bg-preview" style="background:linear-gradient(135deg,#0a0c10,#0d2010,#0a0c10);"></div>
+        <span>Matrix</span>
+      </button>
+      <button class="bg-preset" data-bg="gradient4" onclick="setBackground('gradient4',this)">
+        <div class="bg-preview" style="background:linear-gradient(135deg,#0a0c10,#1f0a0a,#0a0c10);"></div>
+        <span>Ember</span>
+      </button>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="plabel">Eigenes Bild</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="tbtn tbtn-start" onclick="pickBackground()" style="padding:8px 16px;font-size:11px;">
+          <i class="ti ti-photo"></i> Bild auswählen
+        </button>
+        <button class="tbtn tbtn-stop" onclick="removeBackground()" style="padding:8px 16px;font-size:11px;">
+          <i class="ti ti-x"></i> Entfernen
+        </button>
+        <span style="font-size:9px;color:rgba(0,200,255,0.3);letter-spacing:0.5px;" id="bg-filename">Kein Bild ausgewählt</span>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(200,220,255,0.4);">Deckkraft</span>
+        <input type="range" min="5" max="40" value="15" class="vol-slider" id="bg-opacity-slider"
+          style="flex:1;background:linear-gradient(90deg,var(--accent) 15%,rgba(255,255,255,0.07) 15%)"
+          oninput="setBgOpacity(this)">
+        <span class="mono" style="font-size:11px;color:var(--accent);min-width:35px;" id="bg-opacity-val">15%</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- AI Assistant -->
+<div class="ai-bubble" onclick="toggleAI()" title="KI Assistent">🤖</div>
+<div class="ai-window" id="ai-window">
+  <div class="ai-header">
+    <div class="ai-header-dot"></div>
+    <span class="ai-header-title">CTRL AI</span>
+    <span style="font-size:8px;color:rgba(0,212,255,0.3);letter-spacing:1px;">by Groq</span>
+    <button class="ai-header-close" onclick="toggleAI()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="ai-msg ai-msg-bot">Hey! Ich bin CTRL AI. Frag mich alles — Gaming, PC, Windows Tipps oder einfach so. 🎮</div>
+  </div>
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-input" placeholder="Frag mich was..." onkeydown="if(event.key==='Enter')sendAI()">
+    <button class="ai-send-btn" onclick="sendAI()"><i class="ti ti-send"></i></button>
+  </div>
+  <div class="ai-key-hint" id="ai-key-hint">Groq API Key im MISC Tab eintragen</div>
+</div>
+
+
+    <div id="autostart-list">
+      <div style="color:rgba(0,200,255,0.35);font-size:11px;letter-spacing:1px;">Wird geladen...</div>
+    </div>
+    <button class="tbtn tbtn-start" onclick="loadAutostart()" style="margin-top:12px;padding:8px 16px;font-size:11px;">
+      <i class="ti ti-refresh"></i> Aktualisieren
+    </button>
+  </div>
+</div>
+
+
+<!-- Confirmation Modal -->
+<div id="confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:#0d0f14;border:1px solid rgba(0,200,255,0.2);border-radius:12px;padding:28px;max-width:420px;width:90%;position:relative;">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.5),transparent);border-radius:12px 12px 0 0;"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <i class="ti ti-alert-triangle" style="font-size:20px;color:#ffaa00;"></i>
+      <span id="modal-title" style="font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#e0f4ff;"></span>
+    </div>
+    <div id="modal-body" style="font-size:11px;color:rgba(200,220,255,0.6);line-height:1.8;letter-spacing:0.3px;margin-bottom:20px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeModal(false)" class="tbtn tbtn-stop" style="padding:9px 20px;font-size:11px;">
+        <i class="ti ti-x"></i> Abbrechen
+      </button>
+      <button onclick="closeModal(true)" class="tbtn tbtn-start" style="padding:9px 20px;font-size:11px;" id="modal-confirm-btn">
+        <i class="ti ti-check"></i> Ja, fortfahren
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Update Notification Popup -->
+<div id="update-popup" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9500;width:420px;">
+  <div style="background:#0d0f14;border:1px solid rgba(0,200,255,0.25);border-radius:12px;padding:20px 24px;position:relative;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.6),transparent);"></div>
+
+    <!-- Checking -->
+    <div id="upd-checking" style="display:none;align-items:center;gap:10px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:rgba(0,200,255,0.5);animation:pulse-dot 1s infinite;flex-shrink:0;"></div>
+      <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,200,255,0.6);">Nach Updates suchen...</span>
+    </div>
+
+    <!-- Available -->
+    <div id="upd-available" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <i class="ti ti-download" style="font-size:20px;color:#00d4ff;"></i>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00d4ff;">Update verfügbar</div>
+          <div style="font-size:10px;color:rgba(0,200,255,0.4);letter-spacing:0.5px;margin-top:2px;" id="upd-version-label">v0.0.0</div>
+        </div>
+        <button onclick="closeUpdatePopup()" style="margin-left:auto;background:transparent;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:16px;">×</button>
+      </div>
+      <div id="upd-changelog" style="background:rgba(0,0,0,0.3);border:1px solid rgba(0,200,255,0.08);border-radius:7px;padding:10px 12px;font-size:10px;color:rgba(200,220,255,0.5);line-height:1.7;max-height:100px;overflow-y:auto;margin-bottom:14px;letter-spacing:0.3px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeUpdatePopup()" style="flex:1;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px;font-family:Rajdhani,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(200,220,255,0.4);cursor:pointer;">Später</button>
+        <button onclick="startUpdate()" style="flex:2;background:rgba(0,200,255,0.12);border:1px solid rgba(0,200,255,0.4);border-radius:7px;padding:9px;font-family:Rajdhani,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00d4ff;cursor:pointer;">
+          <i class="ti ti-download"></i> Jetzt updaten
+        </button>
+      </div>
+    </div>
+
+    <!-- Downloading -->
+    <div id="upd-downloading" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <i class="ti ti-download" style="font-size:18px;color:#00d4ff;animation:pulse-dot 1s infinite;"></i>
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00d4ff;">Update wird geladen</div>
+          <div style="font-size:9px;color:rgba(0,200,255,0.4);margin-top:2px;" id="upd-dl-info">0 MB/s</div>
+        </div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:13px;color:#00d4ff;" id="upd-pct">0%</span>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;">
+        <div id="upd-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0066ff,#00d4ff);border-radius:2px;transition:width 0.3s ease;"></div>
+      </div>
+    </div>
+
+    <!-- Ready -->
+    <div id="upd-ready" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <i class="ti ti-circle-check" style="font-size:22px;color:#00ff99;"></i>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00ff99;">Update bereit</div>
+          <div style="font-size:9px;color:rgba(0,255,150,0.4);letter-spacing:0.5px;margin-top:2px;">Neustart erforderlich</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeUpdatePopup()" style="flex:1;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px;font-family:Rajdhani,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(200,220,255,0.4);cursor:pointer;">Später</button>
+        <button onclick="installUpdate()" style="flex:2;background:rgba(0,255,150,0.1);border:1px solid rgba(0,255,150,0.35);border-radius:7px;padding:9px;font-family:Rajdhani,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00ff99;cursor:pointer;">
+          <i class="ti ti-refresh"></i> Jetzt neu starten
+        </button>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="upd-error" style="display:none;align-items:center;gap:10px;">
+      <i class="ti ti-alert-circle" style="font-size:18px;color:rgba(255,100,100,0.7);flex-shrink:0;"></i>
+      <span style="font-size:10px;color:rgba(255,150,150,0.7);letter-spacing:0.3px;" id="upd-error-msg">Update fehlgeschlagen.</span>
+      <button onclick="closeUpdatePopup()" style="margin-left:auto;background:transparent;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:16px;">×</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>

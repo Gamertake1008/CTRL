@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>CTRL — Nutzungsbedingungen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0c10;font-family:'Rajdhani',sans-serif;color:#e0f4ff;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+    .glow{position:fixed;width:500px;height:500px;border-radius:50%;filter:blur(100px);opacity:0.12;pointer-events:none;}
+    .g1{background:#0066ff;top:-150px;left:-100px;}.g2{background:#00d4ff;bottom:-150px;right:-100px;}
+    .titlebar{position:fixed;top:0;left:0;right:0;height:32px;-webkit-app-region:drag;}
+    .win-btns{position:fixed;top:0;right:0;display:flex;height:32px;-webkit-app-region:no-drag;}
+    .win-btn{width:46px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:rgba(200,220,255,0.45);cursor:pointer;transition:background 0.15s,color 0.15s;}
+    .win-btn-close:hover{background:#c42b1c;color:#fff;}
+
+    .card{background:rgba(255,255,255,0.03);border:1px solid rgba(0,200,255,0.15);border-radius:16px;padding:36px;width:560px;max-height:80vh;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.6),transparent);}
+
+    .logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;background:#00d4ff;box-shadow:0 0 10px #00d4ff;}
+    .logo-text{font-size:18px;font-weight:700;letter-spacing:5px;color:#00d4ff;text-transform:uppercase;}
+    .subtitle{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(0,200,255,0.4);margin-bottom:20px;}
+
+    .eula-box{flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border:1px solid rgba(0,200,255,0.08);border-radius:8px;padding:16px;margin-bottom:18px;font-size:11px;line-height:1.8;color:rgba(200,220,255,0.65);letter-spacing:0.3px;}
+    .eula-box::-webkit-scrollbar{width:3px;}
+    .eula-box::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.2);border-radius:2px;}
+    .eula-box h3{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00d4ff;margin:14px 0 6px;}
+    .eula-box h3:first-child{margin-top:0;}
+    .eula-box p{margin-bottom:8px;}
+    .eula-box ul{margin:0 0 8px 16px;}
+    .eula-box li{margin-bottom:4px;}
+    .eula-box .highlight{color:rgba(0,255,150,0.8);font-weight:600;}
+    .eula-box .warn{color:rgba(255,200,0,0.7);}
+
+    .scroll-hint{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,200,255,0.3);text-align:center;margin-bottom:10px;}
+    .scroll-hint.done{color:rgba(0,255,150,0.5);}
+
+    .btn-row{display:flex;gap:10px;}
+    .btn-accept{flex:2;border:none;border-radius:8px;padding:13px;background:rgba(0,200,255,0.12);border:1px solid rgba(0,200,255,0.4);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;opacity:0.4;pointer-events:none;}
+    .btn-accept.ready{opacity:1;pointer-events:all;}
+    .btn-accept.ready:hover{background:rgba(0,200,255,0.22);}
+    .btn-decline{flex:1;border:none;border-radius:8px;padding:13px;background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.25);color:rgba(255,100,100,0.6);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+    .btn-decline:hover{background:rgba(255,80,80,0.15);}
+  </style>
+</head>
+<body>
+  <div class="titlebar"></div>
+  <div class="win-btns">
+    <button class="win-btn win-btn-close" onclick="window.ctrl.close()" title="Ablehnen & Beenden">
+      <svg width="12" height="12" viewBox="0 0 12 12"><line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="glow g1"></div><div class="glow g2"></div>
+
+  <div class="card">
+    <div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">CTRL</span></div>
+    <div class="subtitle">Endnutzer-Lizenzvertrag & Datenschutz</div>
+
+    <div class="eula-box" id="eula-box" onscroll="checkScroll()">
+
+      <h3>1. Allgemeines</h3>
+      <p>CTRL ist ein Gaming & QOL Dashboard für Windows. Durch die Nutzung stimmst du diesen Bedingungen einmalig zu. Diese Zustimmung wird lokal gespeichert und muss nicht wiederholt werden.</p>
+
+      <h3>2. KI-System-Analyst — Datenschutz</h3>
+      <p>CTRL bietet eine optionale KI-Analyse-Funktion. <span class="highlight">Die Nutzung ist vollständig freiwillig.</span></p>
+      <p>Wenn du die KI-Analyse verwendest, werden folgende Daten temporär und anonym an den KI-Anbieter Groq (groq.com) übermittelt:</p>
+      <ul>
+        <li>CPU-Auslastung in Prozent</li>
+        <li>RAM-Auslastung in Prozent</li>
+        <li>GPU-Auslastung und Temperatur</li>
+        <li>Netzwerk-Geschwindigkeit (MB/s)</li>
+        <li>Festplatten-Belegung in Prozent</li>
+        <li>Ping-Werte zu Game-Servern</li>
+      </ul>
+      <p><span class="highlight">Es werden KEINE übermittelt:</span> Benutzernamen, Dateipfade, IP-Adressen, Passwörter, Bildschirminhalte, Prozessnamen oder andere persönliche Daten.</p>
+      <p><span class="warn">⚠ Die KI kann ausschließlich Empfehlungen geben.</span> Sie hat keinen Zugriff auf dein System und kann nichts verändern, installieren oder ausführen.</p>
+
+      <h3>3. Lokale Datenspeicherung</h3>
+      <p>CTRL speichert folgende Daten ausschließlich lokal auf deinem PC:</p>
+      <ul>
+        <li>Login-Session (verschlüsselt via Supabase)</li>
+        <li>Deine Einstellungen (Farben, Hintergrund, Lautstärken)</li>
+        <li>Hinzugefügte Spiele und Schnellstart-Apps</li>
+        <li>Uptime-Rekord und Session-Statistiken</li>
+      </ul>
+      <p>Diese Daten verlassen deinen PC nicht und werden nicht an Server übermittelt.</p>
+
+      <h3>4. Systemzugriff</h3>
+      <p>CTRL benötigt Administrator-Rechte für folgende Funktionen:</p>
+      <ul>
+        <li>Echtzeit-Systemdaten (CPU, RAM, GPU, Festplatten)</li>
+        <li>Temp-Dateien löschen und Papierkorb leeren</li>
+        <li>RAM freigeben</li>
+        <li>Mullvad VPN steuern (falls installiert)</li>
+        <li>Spotify-Steuerung via Medientasten</li>
+      </ul>
+      <p>CTRL führt keine Aktionen aus ohne deine ausdrückliche Bestätigung (Buttons, Toggles).</p>
+
+      <h3>5. Drittanbieter</h3>
+      <ul>
+        <li><strong>Supabase</strong> — Login-Authentifizierung</li>
+        <li><strong>Groq</strong> — KI-Analyse (optional, nur auf Anfrage)</li>
+        <li><strong>Open-Meteo</strong> — Wetterdaten (anonym, nur GPS-Region)</li>
+        <li><strong>ip-api.com</strong> — Standorterkennung für Wetter (nur Stadt, keine genaue IP)</li>
+      </ul>
+
+      <h3>6. Haftungsausschluss</h3>
+      <p>CTRL wird ohne Garantie bereitgestellt. Der Entwickler haftet nicht für Schäden die durch die Nutzung entstehen. Die KI-Empfehlungen sind Vorschläge — du entscheidest ob du sie umsetzt.</p>
+
+      <h3>7. Änderungen</h3>
+      <p>Bei wesentlichen Änderungen dieser Bedingungen wirst du beim nächsten Start informiert und musst erneut zustimmen.</p>
+
+      <p style="margin-top:16px;color:rgba(0,200,255,0.4);font-size:10px;letter-spacing:0.5px;">Version 1.0 — CTRL Dashboard</p>
+
+    </div>
+
+    <div class="scroll-hint" id="scroll-hint">↓ Bitte bis zum Ende scrollen um fortzufahren</div>
+
+    <div class="btn-row">
+      <button class="btn-decline" onclick="window.ctrl.close()">✕ &nbsp;Ablehnen</button>
+      <button class="btn-accept" id="btn-accept" onclick="accept()">✓ &nbsp;Akzeptieren & Fortfahren</button>
+    </div>
+  </div>
+
+  <script>
+    function checkScroll() {
+      const box = document.getElementById('eula-box');
+      const hint = document.getElementById('scroll-hint');
+      const btn  = document.getElementById('btn-accept');
+      const atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 20;
+      if (atBottom) {
+        hint.textContent = '✓ Gelesen';
+        hint.classList.add('done');
+        btn.classList.add('ready');
+      }
+    }
+    function accept() {
+      window.ctrl.acceptEula();
+    }
+    // Auto-enable if content fits without scrolling
+    window.addEventListener('DOMContentLoaded', () => {
+      const box = document.getElementById('eula-box');
+      if (box.scrollHeight <= box.clientHeight) {
+        document.getElementById('btn-accept').classList.add('ready');
+        document.getElementById('scroll-hint').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

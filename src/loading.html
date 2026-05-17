@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>CTRL — Loading</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0c10;font-family:'Rajdhani',sans-serif;color:#e0f4ff;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+    .glow{position:fixed;width:500px;height:500px;border-radius:50%;filter:blur(100px);opacity:0.12;pointer-events:none;}
+    .g1{background:#0066ff;top:-150px;left:-100px;} .g2{background:#00d4ff;bottom:-150px;right:-100px;}
+    .titlebar{position:fixed;top:0;left:0;right:0;height:32px;-webkit-app-region:drag;}
+
+    .logo-wrap{display:flex;align-items:center;gap:12px;margin-bottom:48px;}
+    .logo-dot{width:12px;height:12px;border-radius:50%;background:#00d4ff;box-shadow:0 0 16px #00d4ff;animation:pulse-dot 1.5s ease-in-out infinite;}
+    @keyframes pulse-dot{0%,100%{box-shadow:0 0 10px #00d4ff;}50%{box-shadow:0 0 24px #00d4ff,0 0 40px #00d4ff55;}}
+    .logo-text{font-size:28px;font-weight:700;letter-spacing:8px;color:#00d4ff;text-transform:uppercase;}
+
+    .modules{width:360px;display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+    .module-row{display:flex;align-items:center;gap:12px;}
+    .module-name{font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(0,200,255,0.4);width:110px;text-align:right;flex-shrink:0;}
+    .module-bar{flex:1;height:3px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;}
+    .module-fill{height:100%;width:0%;border-radius:2px;background:linear-gradient(90deg,#0066ff,#00d4ff);transition:width 0.3s ease;box-shadow:0 0 6px rgba(0,212,255,0.5);}
+    .module-status{font-family:'Share Tech Mono',monospace;font-size:9px;width:50px;color:rgba(0,200,255,0.3);flex-shrink:0;letter-spacing:0.5px;}
+    .module-status.done{color:rgba(0,255,150,0.6);}
+
+    .bottom{display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .version{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,200,255,0.2);letter-spacing:2px;}
+    .scan{width:360px;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.6),transparent);animation:scan 1.5s ease-in-out infinite;}
+    @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+    .scan-wrap{width:360px;overflow:hidden;}
+
+    .percent{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(0,200,255,0.4);letter-spacing:1px;text-align:center;}
+  </style>
+</head>
+<body>
+  <div class="titlebar"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+
+  <div class="logo-wrap">
+    <div class="logo-dot"></div>
+    <span class="logo-text">CTRL</span>
+  </div>
+
+  <div class="modules" id="modules"></div>
+
+  <div class="bottom">
+    <div class="scan-wrap"><div class="scan"></div></div>
+    <div class="percent" id="pct">0%</div>
+    <div class="version">v1.0.0 — Gaming & QOL Dashboard</div>
+  </div>
+
+  <script>
+    const MODULES = [
+      'Dashboard',
+      'Audio Mixer',
+      'Festplatten',
+      'Netzwerk',
+      'Session Stats',
+      'Spiele',
+      'MISC',
+      'KI Assistent',
+      'Sicherheit',
+      'Autostart',
+    ];
+
+    const container = document.getElementById('modules');
+    const rows = [];
+
+    MODULES.forEach(name => {
+      const row = document.createElement('div');
+      row.className = 'module-row';
+      row.innerHTML = `
+        <span class="module-name">${name}</span>
+        <div class="module-bar"><div class="module-fill" id="fill-${name.replace(/\s/g,'')}"></div></div>
+        <span class="module-status" id="status-${name.replace(/\s/g,'')}" >WARTEN</span>`;
+      container.appendChild(row);
+      rows.push(name);
+    });
+
+    // Random total duration 3000–6000ms
+    const totalMs = 3000 + Math.random() * 3000;
+    const startTime = Date.now();
+    let loaded = 0;
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function step() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / totalMs, 1);
+      const eased = easeOut(progress);
+      const pct = Math.round(eased * 100);
+
+      document.getElementById('pct').textContent = pct + '%';
+
+      // Load modules progressively
+      const modulesToLoad = Math.floor(eased * MODULES.length);
+      while (loaded < modulesToLoad) {
+        const name = MODULES[loaded].replace(/\s/g,'');
+        const fill = document.getElementById('fill-' + name);
+        const status = document.getElementById('status-' + name);
+        if (fill) fill.style.width = '100%';
+        if (status) { status.textContent = 'OK'; status.classList.add('done'); }
+        loaded++;
+      }
+
+      // Partially fill current module
+      if (loaded < MODULES.length) {
+        const name = MODULES[loaded].replace(/\s/g,'');
+        const fill = document.getElementById('fill-' + name);
+        const status = document.getElementById('status-' + name);
+        const partialProgress = (eased * MODULES.length) - loaded;
+        if (fill) fill.style.width = (partialProgress * 100) + '%';
+        if (status) status.textContent = 'LADEN';
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        // All done — go to dashboard
+        MODULES.forEach(n => {
+          const name = n.replace(/\s/g,'');
+          const fill = document.getElementById('fill-' + name);
+          const status = document.getElementById('status-' + name);
+          if (fill) fill.style.width = '100%';
+          if (status) { status.textContent = 'OK'; status.classList.add('done'); }
+        });
+        document.getElementById('pct').textContent = '100%';
+        setTimeout(() => window.ctrl.loadDashboard(), 300);
+      }
+    }
+
+    requestAnimationFrame(step);
+  </script>
+</body>
+</html>

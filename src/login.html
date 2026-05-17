@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>CTRL — Login</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0c10;font-family:'Rajdhani',sans-serif;color:#e0f4ff;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+    .glow{position:fixed;width:500px;height:500px;border-radius:50%;filter:blur(100px);opacity:0.15;pointer-events:none;}
+    .g1{background:#0066ff;top:-150px;left:-100px;}
+    .g2{background:#00d4ff;bottom:-150px;right:-100px;}
+    .card{background:rgba(255,255,255,0.03);border:1px solid rgba(0,200,255,0.15);border-radius:16px;padding:40px;width:380px;position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.6),transparent);}
+    .logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center;}
+    .logo-dot{width:10px;height:10px;border-radius:50%;background:#00d4ff;box-shadow:0 0 12px #00d4ff;}
+    .logo-text{font-size:22px;font-weight:700;letter-spacing:6px;color:#00d4ff;text-transform:uppercase;}
+    .logo-sub{font-size:9px;letter-spacing:3px;color:rgba(0,200,255,0.4);text-transform:uppercase;text-align:center;margin-top:-24px;margin-bottom:24px;}
+    .field{margin-bottom:14px;}
+    .field label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,200,255,0.45);margin-bottom:6px;font-weight:600;}
+    .field input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:7px;padding:11px 14px;font-family:'Share Tech Mono',monospace;font-size:13px;color:#e0f4ff;outline:none;transition:border-color 0.2s;}
+    .field input:focus{border-color:rgba(0,200,255,0.45);}
+    .field input::placeholder{color:rgba(200,220,255,0.2);}
+    .btn-login{width:100%;border:none;border-radius:7px;padding:13px;background:rgba(0,200,255,0.12);border:1px solid rgba(0,200,255,0.4);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-login:hover{background:rgba(0,200,255,0.22);}
+    .btn-login:disabled{opacity:0.5;cursor:not-allowed;}
+    .error{font-size:10px;color:rgba(255,80,80,0.8);letter-spacing:0.5px;margin-top:10px;min-height:16px;text-align:center;}
+    .remember{display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer;}
+    .remember input{width:14px;height:14px;accent-color:#00d4ff;cursor:pointer;}
+    .remember span{font-size:10px;letter-spacing:1px;color:rgba(0,200,255,0.45);text-transform:uppercase;}
+    .titlebar{position:fixed;top:0;left:0;right:0;height:32px;-webkit-app-region:drag;z-index:100;}
+    .win-btns{position:fixed;top:0;right:0;display:flex;height:32px;-webkit-app-region:no-drag;}
+    .wb{width:11px;height:11px;border-radius:50%;cursor:pointer;}
+    .wb-r{background:#ff5f57;}.wb-y{background:#febc2e;}
+    .spinner{width:16px;height:16px;border:2px solid rgba(0,200,255,0.3);border-top-color:#00d4ff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .win-btn { width:46px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:rgba(200,220,255,0.5);cursor:pointer;transition:background 0.15s,color 0.15s;-webkit-app-region:no-drag; }
+  .win-btn:hover{color:rgba(255,255,255,0.9);}
+  .win-btn-min:hover{background:rgba(255,255,255,0.08);}
+  .win-btn-close:hover{background:#e81123;color:#fff;}
+</style>
+</head>
+<body>
+  <div class="titlebar"></div>
+  <div class="win-btns">
+    <button class="win-btn win-btn-min" onclick="window.ctrl.minimize()" title="Minimieren">
+      <svg width="12" height="2" viewBox="0 0 12 2" style="display:block"><rect width="12" height="1.5" y="0.25" fill="currentColor" rx="0.5"/></svg>
+    </button>
+    <button class="win-btn win-btn-close" onclick="window.ctrl.close()" title="Schließen">
+      <svg width="12" height="12" viewBox="0 0 12 12" style="display:block"><line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="card">
+    <div class="logo"><div class="logo-dot"></div><span class="logo-text">CTRL</span></div>
+    <div class="logo-sub">Gaming & QOL Dashboard</div>
+    <div class="field">
+      <label>E-Mail</label>
+      <input type="email" id="email" placeholder="deine@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Passwort</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <label class="remember">
+      <input type="checkbox" id="remember" checked>
+      <span>Angemeldet bleiben</span>
+    </label>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">
+      <div class="spinner" id="spinner"></div>
+      <span id="btn-text">ANMELDEN</span>
+    </button>
+    <div class="error" id="error-msg"></div>
+  </div>
+  <script src="login.js"></script>
+</body>
+</html>
