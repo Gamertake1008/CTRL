@@ -1,4 +1,4 @@
-## CTRL 1.1.0 — Spielebibliothek & Performance
+## CTRL 1.2.0 — Spielebibliothek & Performance
 
 ### Neu
 - **Spiele-Tab komplett überarbeitet** — Steam-Suche mit echten Cover-Bildern, Bibliothek im Kachel-Layout
