@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTRL — Account bestätigen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;}
+    body{
+      background:#0a0c10;
+      font-family:'Rajdhani',sans-serif;
+      color:#e0f4ff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      user-select:none;
+    }
+    body::before{
+      content:'';
+      position:fixed;inset:0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);
+      background-size:40px 40px;
+      pointer-events:none;
+    }
+    .glow{
+      position:fixed;
+      width:600px;height:600px;
+      border-radius:50%;
+      filter:blur(120px);
+      pointer-events:none;
+    }
+    .g1{background:#0055ff;opacity:0.12;top:-200px;left:-150px;}
+    .g2{background:#00d4ff;opacity:0.10;bottom:-200px;right:-150px;}
+
+    .card{
+      position:relative;
+      z-index:1;
+      width:min(420px,90vw);
+      padding:42px 36px 36px;
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(0,200,255,0.15);
+      border-radius:14px;
+      text-align:center;
+      backdrop-filter:blur(8px);
+      box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    }
+    .card::before{
+      content:'';
+      position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,212,255,0.7),transparent);
+    }
+
+    .logo-wrap{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
+    .logo-dot{
+      width:11px;height:11px;border-radius:50%;
+      background:#00d4ff;
+      box-shadow:0 0 14px #00d4ff;
+      animation:pdot 2s ease-in-out infinite;
+    }
+    @keyframes pdot{
+      0%,100%{box-shadow:0 0 8px #00d4ff,0 0 18px rgba(0,212,255,0.3);}
+      50%{box-shadow:0 0 22px #00d4ff,0 0 42px rgba(0,212,255,0.5);}
+    }
+    .logo-text{
+      font-size:24px;font-weight:700;letter-spacing:8px;
+      color:#00d4ff;text-transform:uppercase;
+      text-shadow:0 0 25px rgba(0,212,255,0.3);
+    }
+    .tagline{
+      font-family:'Share Tech Mono',monospace;
+      font-size:9px;letter-spacing:3px;text-transform:uppercase;
+      color:rgba(0,200,255,0.35);
+      margin-bottom:32px;
+    }
+
+    .icon-wrap{
+      width:78px;height:78px;
+      margin:0 auto 22px;
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,200,255,0.06);
+      border:1px solid rgba(0,200,255,0.25);
+      position:relative;
+    }
+    .icon-wrap::after{
+      content:'';position:absolute;inset:-6px;border-radius:50%;
+      border:1px solid rgba(0,200,255,0.12);
+      animation:ring 2.5s ease-out infinite;
+    }
+    @keyframes ring{
+      0%{transform:scale(0.95);opacity:0.6;}
+      100%{transform:scale(1.25);opacity:0;}
+    }
+    .icon-wrap svg{width:38px;height:38px;}
+
+    .state-error .icon-wrap{background:rgba(255,80,80,0.06);border-color:rgba(255,80,80,0.3);}
+    .state-error .icon-wrap::after{border-color:rgba(255,80,80,0.15);}
+    .state-error .logo-dot{background:#ff5555;box-shadow:0 0 14px #ff5555;}
+    .state-error .logo-text{color:#ff7070;text-shadow:0 0 25px rgba(255,100,100,0.3);}
+
+    h1{
+      font-size:22px;font-weight:700;letter-spacing:1px;
+      margin-bottom:10px;
+      color:#e0f4ff;
+    }
+    p{
+      font-size:13px;line-height:1.7;
+      color:rgba(200,220,255,0.65);
+      letter-spacing:0.3px;
+      margin-bottom:24px;
+    }
+
+    .hint{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 16px;
+      background:rgba(0,200,255,0.05);
+      border:1px solid rgba(0,200,255,0.15);
+      border-radius:8px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:10px;letter-spacing:2px;text-transform:uppercase;
+      color:rgba(0,212,255,0.75);
+    }
+    .hint-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:#00d4ff;
+      box-shadow:0 0 8px #00d4ff;
+      animation:pdot 2s ease-in-out infinite;
+    }
+    .state-error .hint{background:rgba(255,80,80,0.05);border-color:rgba(255,80,80,0.2);color:rgba(255,120,120,0.8);}
+    .state-error .hint-dot{background:#ff5555;box-shadow:0 0 8px #ff5555;}
+
+    .footer{
+      position:fixed;bottom:18px;left:0;right:0;
+      text-align:center;
+      font-family:'Share Tech Mono',monospace;
+      font-size:9px;letter-spacing:2.5px;text-transform:uppercase;
+      color:rgba(0,200,255,0.2);
+      z-index:1;
+    }
+    .scan{
+      width:120px;height:1px;margin:0 auto 8px;
+      background:linear-gradient(90deg,transparent,rgba(0,200,255,0.5),transparent);
+    }
+    .state-error .scan{background:linear-gradient(90deg,transparent,rgba(255,80,80,0.4),transparent);}
+  </style>
+</head>
+<body>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+
+  <div class="card" id="card">
+    <div class="logo-wrap">
+      <div class="logo-dot"></div>
+      <span class="logo-text">CTRL</span>
+    </div>
+    <div class="tagline">Gaming &amp; QOL Dashboard</div>
+
+    <div class="icon-wrap">
+      <!-- Default success icon (checkmark) -->
+      <svg id="ico-success" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12.5L10 17.5L19 7.5" stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <!-- Error icon (X) hidden by default -->
+      <svg id="ico-error" viewBox="0 0 24 24" fill="none" style="display:none;">
+        <path d="M7 7L17 17M17 7L7 17" stroke="#ff7070" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1 id="title">Account bestätigt</h1>
+    <p id="msg">Deine E-Mail wurde erfolgreich verifiziert. Du kannst dich jetzt in CTRL einloggen.</p>
+
+    <div class="hint">
+      <span class="hint-dot"></span>
+      <span id="hint-text">CTRL öffnen und einloggen</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="scan"></div>
+    CTRL — Windows x64
+  </div>
+
+  <script>
+    // Supabase fügt Auth-Resultat als URL-Hash an (#access_token=... oder #error=...)
+    (function () {
+      const hash = window.location.hash.startsWith('#')
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const params = new URLSearchParams(hash);
+
+      const error = params.get('error') || params.get('error_code');
+      if (!error) return; // Default-State (Success) bleibt sichtbar
+
+      // Error-State aktivieren
+      document.body.classList.add('state-error');
+      document.getElementById('ico-success').style.display = 'none';
+      document.getElementById('ico-error').style.display   = 'block';
+
+      const code = params.get('error_code');
+      const desc = params.get('error_description') || '';
+
+      let title = 'Bestätigung fehlgeschlagen';
+      let msg   = 'Beim Verifizieren ist ein Fehler aufgetreten. Bitte fordere eine neue Bestätigungs-E-Mail in CTRL an.';
+
+      if (code === 'otp_expired') {
+        title = 'Link abgelaufen';
+        msg   = 'Dieser Bestätigungslink ist nicht mehr gültig. Öffne CTRL und fordere eine neue Bestätigungs-E-Mail an.';
+      } else if (desc) {
+        msg = decodeURIComponent(desc.replace(/\+/g, ' '));
+      }
+
+      document.getElementById('title').textContent     = title;
+      document.getElementById('msg').textContent       = msg;
+      document.getElementById('hint-text').textContent = 'Neue E-Mail in CTRL anfordern';
+    })();
+  </script>
+</body>
+</html>
